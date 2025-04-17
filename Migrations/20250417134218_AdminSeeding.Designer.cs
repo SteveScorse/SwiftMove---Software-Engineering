@@ -11,8 +11,8 @@ using SwiftMove.Data;
 namespace SwiftMove.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250417100210_userChange")]
-    partial class userChange
+    [Migration("20250417134218_AdminSeeding")]
+    partial class AdminSeeding
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

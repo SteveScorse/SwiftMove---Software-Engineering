@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SwiftMove.Data;
@@ -11,6 +12,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<CustomUserModel>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
@@ -39,5 +41,50 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
+
+//Seeds the roles and Admin Account during webapp execution
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<CustomUserModel>>();
+    await SeedRolesAndAdminUser(roleManager, userManager);
+}
+
+//Seeds default roles ("Admin", "Staff", "Customer") if they do not already exist in the database.
+async Task SeedRolesAndAdminUser(RoleManager<IdentityRole> roleManager, UserManager<CustomUserModel> userManager)
+{
+    //Adds Roles
+    string[] roles = { "Admin", "Staff", "Customer" };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+
+
+    var adminEmail = "admin@swiftmove.com";
+    var adminPassword = "Admin123!";
+    if (await userManager.FindByEmailAsync(adminEmail) == null)
+    {
+        var adminUser = new CustomUserModel
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true,
+            FirstName = "SwiftMove",
+            LastName = "Administrator",
+            Address = "Default"
+        };
+
+        var result = await userManager.CreateAsync(adminUser, adminPassword);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
+}
 
 app.Run();

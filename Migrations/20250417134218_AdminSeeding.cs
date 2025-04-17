@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SwiftMove.Migrations
 {
     /// <inheritdoc />
-    public partial class userChange : Migration
+    public partial class AdminSeeding : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
