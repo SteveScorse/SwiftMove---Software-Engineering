@@ -24,7 +24,7 @@ namespace SwiftMove.Controllers
             _roleManager = roleManager;
         }
 
-        public async IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             //Collects all nessacery data from DB
             var services = await _context.Services.ToListAsync();
@@ -48,7 +48,66 @@ namespace SwiftMove.Controllers
                 UserRoles = userRoles
             };
 
+
+
             return View(viewModel);
         }
+
+        // GET: Admin/Edit/1
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
+
+
+            var service = await _context.Services.FindAsync(id);
+            if (service == null)
+            {
+                return NotFound();
+            }
+
+            return View(service);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, ServicesModel service)
+        {
+            if (id != service.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(service);
+                    await _context.SaveChangesAsync();
+
+                    // ✅ Debug message here
+                    Console.WriteLine("✅ Service updated successfully: " + service.Title);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    // ✅ If something breaks, this helps catch it
+                    Console.WriteLine("❌ Update failed: " + ex.Message);
+                }
+            }
+            else
+            {
+                // ✅ Show any model errors in the console (optional)
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine("Validation error: " + error.ErrorMessage);
+                }
+            }
+
+            return View(service);
+        }
+
+
+
     }
 }

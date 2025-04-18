@@ -81,6 +81,26 @@ namespace SwiftMove.Controllers
             return View(services);
         }
 
+        [Authorize(Roles = "Admin,Staff")]
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            //Find the property from id and then remove it from the database.
+            var services = _context.Services.Find(id);
+            _context.Services.Remove(services);
+            _context.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+
+        [Authorize(Roles = "Admin,Staff")]
+        //Get: Property/Edit/id
+        public IActionResult Edit(int id)
+        {
+            var services = _context.Services.Find(id);
+            return View(services);
+        }
+
 
     }
 }
