@@ -5,3 +5,33 @@
 <h1>Administrator Dashboard</h1>
 <p>Manage all staff and admin function from this page, use the forms provided below to interact with database.</p>
 
+<h2>Manage Services</h2>
+<a class="btn btn-custom w-50" asp-controller="Services" asp-action="Create">Add New Service</a>
+<h3>Current Services</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Price</th>
+            <th scope="col">No. of Staff</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var services in Model.Services)
+        {
+            <tr>
+                <td class="fw-bold">@services.Id</td>
+                <td class="fw-bold">@services.Title</td>
+                <td class="fw-bold">@services.Price</td>
+                <td class="fw-bold">@services.NumOfStaff</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@services.Id" class="btn btn-warning">Edit</a>
+                    <a onclick="confirmDelete(@services.Id)" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>

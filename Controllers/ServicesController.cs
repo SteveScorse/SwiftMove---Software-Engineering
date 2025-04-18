@@ -19,9 +19,9 @@ namespace SwiftMove.Controllers
 
         public IActionResult Index()
         {
+            var service = _context.Services.ToList();
 
-
-            return View(services);
+            return View(service);
         }
 
 
