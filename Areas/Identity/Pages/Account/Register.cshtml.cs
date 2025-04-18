@@ -127,6 +127,15 @@ namespace SwiftMove.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
+                    //Checks if the user has any roles attached to them
+                    var userRoles = await _userManager.GetRolesAsync(user);
+
+                    if(userRoles.Count() == 0)
+                    {
+                        //Adds "Customer" role if no roles are found
+                        await _userManager.AddToRoleAsync(user, "Customer");
+                    }
+
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
