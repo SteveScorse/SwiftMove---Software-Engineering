@@ -1,4 +1,5 @@
-﻿@{
+﻿@model SwiftMove.Models.AdminDashboardViewModel
+@{
     ViewData["Title"] = "Admin Dashboard";
 }
 
@@ -35,3 +36,24 @@
     </tbody>
 </table>
 </div>
+
+<script>
+    function confirmDelete(id){
+        //Outputs message to user
+        if(confirm("Are you sure you would like to delete this Service - It Can't Be Undone?")){
+            //Post request
+            fetch(`/Services/Delete/${id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then(response => {
+                if(response.ok){
+                    window.location.reload();
+                } else {
+                    alert("Failed toolbar Delete Service.")
+                }
+            });
+        }
+    }
+</script>

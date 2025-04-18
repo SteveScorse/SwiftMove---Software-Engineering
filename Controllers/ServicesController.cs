@@ -87,9 +87,17 @@ namespace SwiftMove.Controllers
         {
             //Find the property from id and then remove it from the database.
             var services = _context.Services.Find(id);
-            _context.Services.Remove(services);
-            _context.SaveChanges();
-            return RedirectToAction("Index");
+            if (services == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                _context.Services.Remove(services);
+                _context.SaveChanges();
+
+                return RedirectToAction("Index");
+            }
         }
 
 
@@ -100,6 +108,9 @@ namespace SwiftMove.Controllers
             var services = _context.Services.Find(id);
             return View(services);
         }
+
+
+
 
 
     }
