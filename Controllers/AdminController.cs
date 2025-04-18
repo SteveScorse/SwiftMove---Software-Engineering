@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SwiftMove.Data;
 using SwiftMove.Models;
-using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace SwiftMove.Controllers
 {
@@ -83,29 +84,18 @@ namespace SwiftMove.Controllers
                 {
                     _context.Update(service);
                     await _context.SaveChangesAsync();
-
-                    // ✅ Debug message here
-                    Console.WriteLine("✅ Service updated successfully: " + service.Title);
-
+                    Console.WriteLine("✅ Saved to DB");
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    // ✅ If something breaks, this helps catch it
-                    Console.WriteLine("❌ Update failed: " + ex.Message);
-                }
-            }
-            else
-            {
-                // ✅ Show any model errors in the console (optional)
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    Console.WriteLine("Validation error: " + error.ErrorMessage);
+                    Console.WriteLine("❌ Save failed: " + ex.Message);
                 }
             }
 
             return View(service);
         }
+
 
 
 
