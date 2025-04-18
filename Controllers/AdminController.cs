@@ -54,13 +54,11 @@ namespace SwiftMove.Controllers
             return View(viewModel);
         }
 
-        // GET: Admin/Edit/1
-        public async Task<IActionResult> Edit(int? id)
+        [Authorize(Roles = "Admin, Staff")]
+        public IActionResult Edit(int id)
         {
-            if (id == null) return NotFound();
-
-
-            var service = await _context.Services.FindAsync(id);
+            var service = _context.Services.Find(id);
+            
             if (service == null)
             {
                 return NotFound();
@@ -69,32 +67,62 @@ namespace SwiftMove.Controllers
             return View(service);
         }
 
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ServicesModel service)
+        public IActionResult Edit(ServicesModel services, IFormFile imageFile)
         {
-            if (id != service.Id)
+            //Finds the Property via its matching ID in the DB
+            var existingService= _context.Services.Find(services.Id);
+            if (existingService == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            //Update Fields from tha form
+            existingService.Title = services.Title;
+            existingService.Price = services.Price;
+            existingService.Description = services.Description;
+            existingService.NumStaffRequired = services.NumStaffRequired;
+            
+
+            //Image Changes
+            if (imageFile != null && imageFile.Length > 0)
             {
+                var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+                if (!Directory.Exists(imagesDirectory))
+                {
+                    Directory.CreateDirectory(imagesDirectory);
+                }
+
+                var filePath = Path.Combine(imagesDirectory, imageFile.FileName);
+
                 try
                 {
-                    _context.Update(service);
-                    await _context.SaveChangesAsync();
-                    Console.WriteLine("✅ Saved to DB");
-                    return RedirectToAction(nameof(Index));
+                    //Save new image to server
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        imageFile.CopyTo(stream);
+                    }
+
+                    //Update Image only if a new one is uploaded
+                    existingService.Image = imageFile.FileName;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("❌ Save failed: " + ex.Message);
+                    ModelState.AddModelError("", "An Error has occured whilst saving the uploaded image. Please try again!");
+                    return View(services);
                 }
             }
 
-            return View(service);
+            //updates DB
+            _context.Update(existingService);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+
         }
+
 
 
 
