@@ -10,5 +10,7 @@ namespace SwiftMove.Data
             : base(options)
         {
         }
+
+        public DbSet<ServicesModel> Services { get; set; }
     }
 }
