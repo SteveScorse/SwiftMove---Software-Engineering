@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SwiftMove.Data;
 using SwiftMove.Models;
@@ -87,7 +88,7 @@ namespace SwiftMove.Controllers
         public IActionResult Edit(int id)
         {
             var service = _context.Services.Find(id);
-            
+
             if (service == null)
             {
                 return NotFound();
@@ -102,8 +103,8 @@ namespace SwiftMove.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(ServicesModel services, IFormFile imageFile)
         {
-            //Finds the Property via its matching ID in the DB
-            var existingService= _context.Services.Find(services.Id);
+            //Finds the Service via its matching ID in the DB
+            var existingService = _context.Services.Find(services.Id);
             if (existingService == null)
             {
                 return NotFound();
@@ -114,7 +115,7 @@ namespace SwiftMove.Controllers
             existingService.Price = services.Price;
             existingService.Description = services.Description;
             existingService.NumStaffRequired = services.NumStaffRequired;
-            
+
 
             //Image Changes
             if (imageFile != null && imageFile.Length > 0)
@@ -287,8 +288,47 @@ namespace SwiftMove.Controllers
 
 
 
+        [HttpGet]
+        public IActionResult EditBooking(int id)
+        {
+            var booking = _context.Bookings
+                .Include(b => b.Service)
+                .Include(b => b.Customer)
+                .FirstOrDefault(b => b.Id == id);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            // If needed, populate dropdowns
+            ViewBag.Services = new SelectList(_context.Services.ToList(), "Id", "Title");
+
+            return View(booking);
+        }
 
 
+
+        [HttpPost]
+        public IActionResult EditBooking(BookingsModel bookings)
+        {
+            var existingBooking = _context.Bookings.Find(bookings.Id);
+            if (existingBooking == null)
+            {
+                return NotFound();
+            }
+
+            // Only update fields that are meant to change
+            existingBooking.BookingDate = bookings.BookingDate;
+            existingBooking.Status = bookings.Status;
+            existingBooking.Notes = bookings.Notes;
+            existingBooking.ServiceId = bookings.ServiceId;
+
+            _context.Update(existingBooking);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
 
     }
 }
