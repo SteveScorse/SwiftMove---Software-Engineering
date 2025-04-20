@@ -29,6 +29,7 @@ namespace SwiftMove.Models
         [Required]
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
 
+        [Required]
         [Range(1, 20, ErrorMessage = "You must assign at least 1 staff")]
         public int AssignedStaffCount { get; set; }
 

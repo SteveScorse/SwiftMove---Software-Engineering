@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SwiftMove.Data;
 using SwiftMove.Models;
@@ -23,13 +24,69 @@ namespace SwiftMove.Controllers
             _userManager = userManager;
         }
 
+        //Booking GET Request
+        [HttpGet]
+        public IActionResult Index()
+        {
+            var services = _context.Services.ToList();
 
-        //public IActionResult Index()
-        //{
-        //    var booking = _context.Booking.ToList();
-        //
-        //    return View(booking);
-        //}
+            var viewModel = new BookingFormViewModel
+            {
+                AvailableServices = services.Select(s => new SelectListItem
+                {
+                    Value = s.Id.ToString(),
+                    Text = s.Title
+                }).ToList()
+            };
+
+            return View(viewModel);
+        }
+
+        //Booking POST Request
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(BookingFormViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // repopulate services dropdown
+                model.AvailableServices = _context.Services.Select(s => new SelectListItem
+                {
+                    Value = s.Id.ToString(),
+                    Text = s.Title
+                }).ToList();
+                return View(model);
+            }
+
+            var selectedService = await _context.Services.FindAsync(model.ServiceId);
+            if (selectedService == null)
+            {
+                ModelState.AddModelError("ServiceId", "Selected service not found.");
+                return View(model);
+            }
+
+            var booking = new BookingsModel
+            {
+                CustomerId = _userManager.GetUserId(User),
+                ServiceId = model.ServiceId,
+                BookingDate = model.BookingDate,
+                Notes = model.Notes,
+                AssignedStaffCount = selectedService.NumStaffRequired,
+                Status = BookingStatus.Pending
+            };
+
+            _context.Bookings.Add(booking);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Confirmation");
+        }
+
+        //Booking Confirmation
+        [HttpGet]
+        public IActionResult Confirmation()
+        {
+            return View();
+        }
 
 
         // GET: Bookings/Create
