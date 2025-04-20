@@ -2,77 +2,57 @@
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-warning">@TempData["Error"]</div>
-}
 
+<div class="container my-5">
 
-<h1>Administrator Dashboard</h1>
-<p>Manage all staff and admin function from this page, use the forms provided below to interact with database.</p>
-
-
-<!--Services Related------------------------------------------------------------------------------->
-<h2>Manage Services</h2>
-<a class="btn btn-custom w-50" asp-controller="Services" asp-action="Create">Add New Service</a>
-<h3>Current Services</h3>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Name</th>
-            <th scope="col">Price</th>
-            <th scope="col">No. of Staff</th>
-            <th scope="col">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var services in Model.Services)
-        {
-            <tr>
-                <td class="fw-bold">@services.Id</td>
-                <td class="fw-bold">@services.Title</td>
-                <td class="fw-bold">@services.Price</td>
-                <td class="fw-bold">@services.NumStaffRequired</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@services.Id" class="btn btn-warning">Edit</a>
-                    <form asp-controller="Admin" asp-action="DeleteService" method="post" onsubmit="return confirm('Are you sure you want to delete this service?');">
-                        <input type="hidden" name="id" value="@services.Id" />
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-</div>
-
-<script>
-    function confirmDelete(id){
-        //Outputs message to user
-        if(confirm("Are you sure you would like to delete this Service - It Can't Be Undone?")){
-            //Post request
-            fetch(`/Services/Delete/${id}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }).then(response => {
-                if(response.ok){
-                    window.location.reload();
-                } else {
-                    alert("Failed toolbar Delete Service.")
-                }
-            });
-        }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-warning">@TempData["Error"]</div>
     }
-</script>
-<!--Services Related------------------------------------------------------------------------------->
 
-<!--Role Assignment Related------------------------------------------------------------------------------->
-<div class="row">
-    <div class="col h-auto bg-white shadow-lg rounded-3">
-        <h2>Manage Account Assigned Roles</h2>
+    <h1 class="fw-bold text-uppercase mb-4">Administrator Dashboard</h1>
+    <p class="mb-5">Manage all staff and admin function from this page, use the forms provided below to interact with database.</p>
+
+    <!-- Services Section -->
+    <div class="bg-white p-4 rounded shadow-sm mb-5">
+        <h2 class="fw-bold border-bottom pb-2 mb-4">Manage Services</h2>
+        <a class="btn btn-success align-content-center btn-lg w-50 mb-3" asp-controller="Services" asp-action="Create">Add New Service</a>
+
+        <h4>Current Services</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>No. of Staff</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var services in Model.Services)
+                {
+                    <tr>
+                        <td class="fw-bold">@services.Id</td>
+                        <td>@services.Title</td>
+                        <td>@services.Price</td>
+                        <td>@services.NumStaffRequired</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@services.Id" class="btn btn-warning">Edit</a>
+                            <form asp-controller="Admin" asp-action="DeleteService" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this service?');">
+                                <input type="hidden" name="id" value="@services.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Role Assignment Section -->
+    <div class="bg-white p-4 rounded shadow-sm mb-5">
+        <h2 class="fw-bold border-bottom pb-2 mb-4">Manage Account Assigned Roles</h2>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -97,9 +77,7 @@
                         <td>
                             @foreach (var role in currentuserRoles)
                             {
-                                @role
-                        
-                                <br />
+                                <span class="badge bg-secondary">@role</span><br />
                             }
                         </td>
                         <td>
@@ -117,7 +95,7 @@
                         <td>
                             <form asp-controller="Admin" asp-action="RemoveRole" method="post" class="d-flex">
                                 <input type="hidden" name="userID" value="@user.Id" />
-                                <select name="roleName" class="form-select">
+                                <select name="roleName" class="form-select me-2">
                                     @foreach (var role in currentuserRoles)
                                     {
                                         <option value="@role">@role</option>
@@ -126,142 +104,136 @@
                                 <button type="submit" class="btn btn-danger">Remove</button>
                             </form>
                         </td>
-
                     </tr>
                 }
             </tbody>
         </table>
     </div>
-</div>
-<!--Role Assignment Related------------------------------------------------------------------------------->
 
-<!--Role Management Related------------------------------------------------------------------------------->
-<h2>Manage Roles</h2>
-<form asp-controller="Admin" asp-action="AddRole" method="post" class="mb-3 d-flex">
-    <input type="text" name="roleName" class="form-control w-75 me-2" required placeholder="Enter the new role" />
-    <button type="submit" class="btn btn-success w-25">Add Role</button>
-</form>
-<h3>Existing Roles</h3>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Role Name</th>
-            <th>Delete</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var role in Model.Roles)
-        {
-            <tr>
-                <td>@role.Name</td>
-                <td>
-                    <form asp-controller="Admin" asp-action="DeleteRole" method="post" onsubmit="return confirmDelete()">
-                        <input type="hidden" value="@role.Id" name="roleID" />
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <!-- Role Management Section -->
+    <div class="bg-white p-4 rounded shadow-sm mb-5">
+        <h2 class="fw-bold border-bottom pb-2 mb-4">Manage Roles</h2>
+        <form asp-controller="Admin" asp-action="AddRole" method="post" class="mb-4 d-flex">
+            <input type="text" name="roleName" class="form-control w-75 me-2" required placeholder="Enter the new role" />
+            <button type="submit" class="btn btn-success w-25">Add Role</button>
+        </form>
+
+        <h4>Existing Roles</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Role Name</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var role in Model.Roles)
+                {
+                    <tr>
+                        <td>@role.Name</td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="DeleteRole" method="post" onsubmit="return confirmDelete()">
+                                <input type="hidden" value="@role.Id" name="roleID" />
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bookings Section -->
+    <div class="bg-white p-4 rounded shadow-sm mb-5">
+        <h2 class="fw-bold border-bottom pb-2 mb-4">Bookings</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Assigned Staff</th>
+                    <th>Status</th>
+                    <th>Assign Staff</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var booking in Model.Bookings)
+                {
+                    var availableStaff = ((Dictionary<int, List<CustomUserModel>>)ViewBag.AvailableStaffPerBooking)[booking.Id];
+                    var staffAssigned = booking.StaffAssignments.Count();
+                    var maxStaff = booking.Service.NumStaffRequired;
+                    bool isFull = staffAssigned >= maxStaff;
+                    bool canAssign = availableStaff.Any();
+
+                    string rowClass = isFull ? "table-success" : "";
+
+                    <tr class="@rowClass">
+                        <td>@booking.Id</td>
+                        <td>@booking.Customer.FirstName @booking.Customer.LastName</td>
+                        <td>@booking.Service.Title</td>
+                        <td>@booking.BookingDate.ToShortDateString()</td>
+                        <td>
+                            @foreach (var sa in booking.StaffAssignments)
+                            {
+                                <span class="badge bg-info text-dark">@sa.Staff.FirstName</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="UpdateBookingStatus" method="post" class="d-flex">
+                                <input type="hidden" name="bookingId" value="@booking.Id" />
+                                <select name="status" class="form-select me-2">
+                                    @foreach (BookingStatus status in Enum.GetValues(typeof(BookingStatus)))
+                                    {
+                                        string selected = status == booking.Status ? "selected" : "";
+                                        @:<option value="@status" @selected>@status</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-success">Update</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="AssignOrUnassignStaff" method="post" class="d-flex flex-column gap-1">
+                                <input type="hidden" name="bookingId" value="@booking.Id" />
+                                <select name="staffId" class="form-select" @(canAssign ? "" : "disabled")>
+                                    @if (canAssign)
+                                    {
+                                        @foreach (var staff in availableStaff)
+                                        {
+                                            <option value="@staff.Id">@staff.FirstName @staff.LastName</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option>No staff available</option>
+                                    }
+                                </select>
+
+                                <div class="d-flex gap-1">
+                                    <button type="submit" name="action" value="assign" class="btn btn-sm btn-success" @(canAssign ? "" : "disabled")>Assign</button>
+                                    <button type="submit" name="action" value="unassign" class="btn btn-sm btn-danger">Unassign</button>
+                                </div>
+                            </form>
+                        </td>
+                        <td>
+                            <a asp-action="EditBooking" asp-route-id="@booking.Id" class="btn btn-warning">Edit</a>
+                            <form asp-action="DeleteBooking" method="post" onsubmit="return confirm('Are you sure you want to delete this booking?');">
+                                <input type="hidden" name="id" value="@booking.Id" />
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
 
 <script>
     function confirmDelete() {
         return confirm("Are you sure you want to delete this role?");
     }
 </script>
-<!--Role Management Related------------------------------------------------------------------------------->
-
-<!--Bookings Related------------------------------------------------------------------------------->
-<h3>Bookings</h3>
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Customer</th>
-            <th>Service</th>
-            <th>Date</th>
-            <th>Assigned Staff</th>
-            <th>Status</th>
-            <th>Assign Staff</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var booking in Model.Bookings)
-        {
-            var availableStaff = ((Dictionary<int, List<CustomUserModel>>)ViewBag.AvailableStaffPerBooking)[booking.Id];
-            var staffAssigned = booking.StaffAssignments.Count();
-            var maxStaff = booking.Service.NumStaffRequired;
-            bool isFull = staffAssigned >= maxStaff;
-
-            // Conditional row highlight for fully assigned jobs
-            string rowClass = isFull ? "table-success" : "";
-
-            <tr class="@rowClass">
-                <td>@booking.Id</td>
-                <td>@booking.Customer.FirstName @booking.Customer.LastName</td>
-                <td>@booking.Service.Title</td>
-                <td>@booking.BookingDate.ToShortDateString()</td>
-
-                <td>
-                    @foreach (var sa in booking.StaffAssignments)
-                    {
-                        <span class="badge bg-info text-dark">@sa.Staff.FirstName</span>
-                    }
-                </td>
-
-                <!-- Status Column with Dropdown -->
-                <td>
-                    <form asp-controller="Admin" asp-action="UpdateBookingStatus" method="post" class="d-flex">
-                        <input type="hidden" name="bookingId" value="@booking.Id" />
-                        <select name="status" class="form-select me-2">
-                            @foreach (BookingStatus status in Enum.GetValues(typeof(BookingStatus)))
-                            {
-                                string selected = status == booking.Status ? "selected" : "";
-                                @:<option value="@status" @selected>@status</option>
-                            }
-                        </select>
-                        <button type="submit" class="btn btn-success">Update</button>
-                    </form>
-                </td>
-
-
-                <!-- Assign Staff Form -->
-                <td>
-                    <form method="post" asp-action="AssignStaff">
-                        <input type="hidden" name="bookingId" value="@booking.Id" />
-                        <select name="staffId" class="form-select" @(isFull ? "disabled" : "")>
-                            @foreach (var staff in availableStaff)
-                            {
-                                <option value="@staff.Id">@staff.FirstName @staff.LastName</option>
-                            }
-                        </select>
-                        <button type="submit" class="btn btn-sm btn-success mt-1" @(isFull ? "disabled" : "")>Assign</button>
-                        @if (isFull)
-                        {
-                            <small class="text-muted d-block">Max staff assigned</small>
-                        }
-                    </form>
-                </td>
-
-                <td>
-                    <a asp-action="EditBooking" asp-route-id="@booking.Id" class="btn btn-warning">Edit</a>
-                    <form asp-action="DeleteBooking" method="post" onsubmit="return confirm('Are you sure you want to delete this booking?');">
-                        <input type="hidden" name="id" value="@booking.Id" />
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                    </form>
-
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-
-
-
-
-
-<!--Bookings Related------------------------------------------------------------------------------->
