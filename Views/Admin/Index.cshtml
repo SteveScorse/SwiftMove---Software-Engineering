@@ -2,6 +2,11 @@
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-warning">@TempData["Error"]</div>
+}
+
 
 <h1>Administrator Dashboard</h1>
 <p>Manage all staff and admin function from this page, use the forms provided below to interact with database.</p>
@@ -165,8 +170,8 @@
 <!--Role Management Related------------------------------------------------------------------------------->
 
 <!--Bookings Related------------------------------------------------------------------------------->
-
 <h3>Bookings</h3>
+
 <table class="table table-striped">
     <thead>
         <tr>
@@ -175,44 +180,81 @@
             <th>Service</th>
             <th>Date</th>
             <th>Assigned Staff</th>
+            <th>Status</th>
             <th>Assign Staff</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var booking in Model.Bookings)
         {
-            <tr>
+            var availableStaff = ((Dictionary<int, List<CustomUserModel>>)ViewBag.AvailableStaffPerBooking)[booking.Id];
+            var staffAssigned = booking.StaffAssignments.Count();
+            var maxStaff = booking.Service.NumStaffRequired;
+            bool isFull = staffAssigned >= maxStaff;
+
+            // Conditional row highlight for fully assigned jobs
+            string rowClass = isFull ? "table-success" : "";
+
+            <tr class="@rowClass">
                 <td>@booking.Id</td>
-                <td>@booking.Customer?.FirstName @booking.Customer?.LastName</td>
-                <td>@booking.Service?.Title</td>
+                <td>@booking.Customer.FirstName @booking.Customer.LastName</td>
+                <td>@booking.Service.Title</td>
                 <td>@booking.BookingDate.ToShortDateString()</td>
+
                 <td>
                     @foreach (var sa in booking.StaffAssignments)
                     {
                         <span class="badge bg-info text-dark">@sa.Staff.FirstName</span>
                     }
                 </td>
-                <td>
-                    <form asp-action="AssignStaffInline" method="post">
-                        <input type="hidden" name="bookingId" value="@booking.Id" />
 
-                        <select name="staffIds" multiple class="form-select form-select-sm">
-                            @foreach (var staff in ViewBag.AllStaff as List<CustomUserModel>)
+                <!-- Status Column with Dropdown -->
+                <td>
+                    <form asp-controller="Admin" asp-action="UpdateBookingStatus" method="post" class="d-flex">
+                        <input type="hidden" name="bookingId" value="@booking.Id" />
+                        <select name="status" class="form-select me-2">
+                            @foreach (BookingStatus status in Enum.GetValues(typeof(BookingStatus)))
                             {
-                                var assigned = booking.StaffAssignments.Any(a => a.StaffId == staff.Id);
-                                <option value="@staff.Id" selected="@assigned">
-                                    @staff.FirstName @staff.LastName
-                                </option>
+                                string selected = status == booking.Status ? "selected" : "";
+                                @:<option value="@status" @selected>@status</option>
                             }
                         </select>
-
-                        <button type="submit" class="btn btn-sm btn-success mt-1">Save</button>
+                        <button type="submit" class="btn btn-success">Update</button>
                     </form>
+                </td>
+
+
+                <!-- Assign Staff Form -->
+                <td>
+                    <form method="post" asp-action="AssignStaff">
+                        <input type="hidden" name="bookingId" value="@booking.Id" />
+                        <select name="staffId" class="form-select" @(isFull ? "disabled" : "")>
+                            @foreach (var staff in availableStaff)
+                            {
+                                <option value="@staff.Id">@staff.FirstName @staff.LastName</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-success mt-1" @(isFull ? "disabled" : "")>Assign</button>
+                        @if (isFull)
+                        {
+                            <small class="text-muted d-block">Max staff assigned</small>
+                        }
+                    </form>
+                </td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@booking.Id" class="btn btn-warning">Edit</a>
+                    <a onclick="confirmDelete(@booking.Id)" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+
+
+
 
 
 <!--Bookings Related------------------------------------------------------------------------------->

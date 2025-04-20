@@ -47,7 +47,23 @@ namespace SwiftMove.Controllers
             .ToListAsync();
 
             var staff = await _userManager.GetUsersInRoleAsync("Staff");
-            ViewBag.AllStaff = staff;
+
+            // Dictionary to store available staff per booking ID
+            var availableStaffPerBooking = new Dictionary<int, List<CustomUserModel>>();
+
+            foreach (var booking in bookings)
+            {
+                var unavailableStaffIds = _context.StaffAssignments
+                    .Where(sa => sa.Booking.BookingDate == booking.BookingDate)
+                    .Select(sa => sa.StaffId)
+                    .ToHashSet();
+
+                var available = staff.Where(s => !unavailableStaffIds.Contains(s.Id)).ToList();
+
+                availableStaffPerBooking[booking.Id] = available;
+            }
+
+            ViewBag.AvailableStaffPerBooking = availableStaffPerBooking;
 
 
             //Create the view model and pass the data into the view:
@@ -207,31 +223,71 @@ namespace SwiftMove.Controllers
         //Bookings Related --------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        public async Task<IActionResult> AssignStaffInline(int bookingId, List<string> staffIds)
+        public async Task<IActionResult> AssignStaff(int bookingId, string staffId)
         {
+            // Check if already assigned
+            var alreadyAssigned = await _context.StaffAssignments
+                .AnyAsync(sa => sa.BookingId == bookingId && sa.StaffId == staffId);
+
+            if (alreadyAssigned)
+            {
+                // Optional: return a message or alert to indicate already assigned
+                return RedirectToAction("Index");
+            }
+
+            // Get the booking with the associated service info
             var booking = await _context.Bookings
+                .Include(b => b.Service)
                 .Include(b => b.StaffAssignments)
                 .FirstOrDefaultAsync(b => b.Id == bookingId);
 
             if (booking == null)
-                return NotFound();
-
-            // Remove existing assignments
-            _context.StaffAssignments.RemoveRange(booking.StaffAssignments);
-
-            // Add new
-            foreach (var staffId in staffIds)
             {
-                _context.StaffAssignments.Add(new StaffAssignmentModel
-                {
-                    BookingId = bookingId,
-                    StaffId = staffId
-                });
+                return NotFound();
             }
 
+            // Check how many staff are currently assigned
+            int currentlyAssignedCount = booking.StaffAssignments.Count;
+            int maxStaffRequired = booking.Service.NumStaffRequired;
+
+            if (currentlyAssignedCount >= maxStaffRequired)
+            {
+                // Optional: TempData message to show in the view
+                TempData["Error"] = $"This booking already has the required {maxStaffRequired} staff assigned.";
+                return RedirectToAction("Index");
+            }
+
+            // Assign new staff
+            var assignment = new StaffAssignmentModel
+            {
+                BookingId = bookingId,
+                StaffId = staffId
+            };
+            _context.StaffAssignments.Add(assignment);
             await _context.SaveChangesAsync();
+
             return RedirectToAction("Index");
         }
+
+        //Booking update POST action
+        [HttpPost]
+        public IActionResult UpdateBookingStatus(int bookingId, BookingStatus status)
+        {
+            var booking = _context.Bookings.FirstOrDefault(b => b.Id == bookingId);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            booking.Status = status;
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
+
+
+
+
 
 
     }

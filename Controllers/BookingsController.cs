@@ -126,5 +126,27 @@ namespace SwiftMove.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateBookingStatus(int bookingId, BookingStatus status)
+        {
+            var booking = await _context.Bookings
+                .Include(b => b.StaffAssignments)
+                .FirstOrDefaultAsync(b => b.Id == bookingId);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            // Update the status of the booking
+            booking.Status = status;
+
+            // Save the changes
+            _context.Update(booking);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index)); // Redirect back to the bookings index
+        }
     }
 }
