@@ -162,7 +162,11 @@ namespace SwiftMove.Controllers
                     return View(services);
                 }
             }
-
+            else
+            {
+                // If no new image is uploaded, keep the existing image
+                existingService.Image = existingService.Image;
+            }
 
 
             //updates DB

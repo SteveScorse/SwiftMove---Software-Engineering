@@ -36,10 +36,18 @@
         <span asp-validation-for="NumStaffRequired" class="text-danger"></span>
     </div>
 
+    @if (!string.IsNullOrEmpty(Model.Image))
+    {
+        <label class="form-label">Current Image:</label>
     <div class="mb-3">
-        <label asp-for="Image" class="form-label">Update Image</label>
+        <img src="@Url.Content("~/images/" + Model.Image)" style="max-width: 200px;" />
+    </div>
+    }
+
+    <div class="mb-3">
+        <label asp-for="Image" class="form-label">Update Image (Optional)</label>
         <input asp-for="Image" type="file" name="imageFile" class="form-control" />
-        <span asp-validation-for="Image" class="text-danger"></span>
+        
     </div>
 
     <button type="submit" class="btn btn-primary">Save</button>
