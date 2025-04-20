@@ -24,3 +24,23 @@ body {
     font-family: 'League Spartan', sans-serif;
     background-color: #f2f2f2;
 }
+
+html.uryjhcs.idc0_350 body div.container {
+    display: block !important; /* Makes sure it's visible */
+}
+
+.container1 {
+    width: 100vw !important; /* Make it span full screen */
+    height: 9vw;
+    margin-left: calc(-50vw + 50%) !important; /* Pull it left outside the container */
+    background-color: #436B47 !important;
+}
+
+.h1a {
+    font-size: 4rem !important;
+    font-weight: 700 !important; 
+}
+
+.btn-success {
+    background: #436B47 !important;
+}

@@ -4,34 +4,46 @@
     ViewData["Title"] = "Book a Service";
 }
 
-<h2>Book a Service</h2>
-
-<form asp-action="Index" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    <div class="mb-3">
-        <label asp-for="ServiceId" class="form-label">Service</label>
-        <select asp-for="ServiceId" asp-items="Model.AvailableServices" class="form-control">
-            <option value="">-- Select a service --</option>
-        </select>
-        <span asp-validation-for="ServiceId" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="BookingDate" class="form-label">Booking Date</label>
-        <input asp-for="BookingDate" class="form-control" />
-        <span asp-validation-for="BookingDate" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Notes" class="form-label">Additional Notes</label>
-        <textarea asp-for="Notes" class="form-control"></textarea>
-        <span asp-validation-for="Notes" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
 }
+
+<div class="container my-5">
+
+    <div class="d-flex justify-content-between flex-wrap gap-4">
+
+        <!-- Booking Form Section -->
+        <div class="bg-white p-4 rounded shadow-sm mb-5 flex-fill" style="min-width: 48%">
+
+            <h2 class="fw-bold border-bottom pb-2 mb-4">Book a Service</h2>
+
+            <!-- Booking Form Start -->
+            <form asp-action="Index" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="ServiceId" class="form-label">Service</label>
+                    <select asp-for="ServiceId" asp-items="Model.AvailableServices" class="form-select">
+                        <option value="">-- Select a service --</option>
+                    </select>
+                    <span asp-validation-for="ServiceId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="BookingDate" class="form-label">Booking Date</label>
+                    <input asp-for="BookingDate" type="date" class="form-control" />
+                    <span asp-validation-for="BookingDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Notes" class="form-label">Additional Notes</label>
+                    <textarea asp-for="Notes" class="form-control"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Submit</button>
+            </form>
+            <!-- Booking Form End -->
+
+        </div>

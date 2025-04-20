@@ -6,6 +6,11 @@
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
+<div class="container1 justify-content-center" style="max-width: 2000px">
+    <div class="container text-start pt-5 pb-4">
+        <h1 class="container text-white h1a ">The Control Room</h1>
+    </div>
+</div>
 
 <div class="container my-5">
 
@@ -158,7 +163,6 @@
         <table class="table table-striped table-sm align-middle">
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Customer</th>
                     <th>Service</th>
                     <th>Date</th>
@@ -180,7 +184,6 @@
                     string rowClass = isFull ? "table-success" : "";
 
                     <tr class="@rowClass">
-                        <td>@booking.Id</td>
                         <td>@booking.Customer.FirstName @booking.Customer.LastName</td>
                         <td>@booking.Service.Title</td>
                         <td>@booking.BookingDate.ToShortDateString()</td>
