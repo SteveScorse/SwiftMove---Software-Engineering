@@ -36,7 +36,10 @@
                 <td class="fw-bold">@services.NumStaffRequired</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@services.Id" class="btn btn-warning">Edit</a>
-                    <a onclick="confirmDelete(@services.Id)" class="btn btn-danger">Delete</a>
+                    <form asp-controller="Admin" asp-action="DeleteService" method="post" onsubmit="return confirm('Are you sure you want to delete this service?');">
+                        <input type="hidden" name="id" value="@services.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
                 </td>
             </tr>
         }
@@ -245,7 +248,11 @@
 
                 <td>
                     <a asp-action="EditBooking" asp-route-id="@booking.Id" class="btn btn-warning">Edit</a>
-                    <a onclick="confirmDelete(@booking.Id)" class="btn btn-danger">Delete</a>
+                    <form asp-action="DeleteBooking" method="post" onsubmit="return confirm('Are you sure you want to delete this booking?');">
+                        <input type="hidden" name="id" value="@booking.Id" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+
                 </td>
             </tr>
         }

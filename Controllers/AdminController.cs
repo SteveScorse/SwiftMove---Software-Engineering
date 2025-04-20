@@ -47,24 +47,38 @@ namespace SwiftMove.Controllers
             .ThenInclude(sa => sa.Staff)
             .ToListAsync();
 
-            var staff = await _userManager.GetUsersInRoleAsync("Staff");
+            //Super Longggggg Booking Logic - Alot of validation and whatnot to keep data integrity throughout DB
+            var allUsers = await _userManager.Users.ToListAsync();
 
-            // Dictionary to store available staff per booking ID
+            var allStaff = new List<CustomUserModel>();
+            foreach (var user in allUsers)
+            {
+                if (await _userManager.IsInRoleAsync(user, "Staff"))
+                {
+                    allStaff.Add(user);
+                }
+            }
+
             var availableStaffPerBooking = new Dictionary<int, List<CustomUserModel>>();
 
+            //Stops Staff who have been Assigned, but then Unassigned from getting greyout on other bookings
             foreach (var booking in bookings)
             {
-                var unavailableStaffIds = _context.StaffAssignments
-                    .Where(sa => sa.Booking.BookingDate == booking.BookingDate)
+                var assignedStaffIds = _context.StaffAssignments
+                    .Where(sa => sa.Booking.BookingDate == booking.BookingDate && sa.BookingId != booking.Id)
                     .Select(sa => sa.StaffId)
-                    .ToHashSet();
+                    .ToList();
 
-                var available = staff.Where(s => !unavailableStaffIds.Contains(s.Id)).ToList();
+                var available = allStaff
+                    .Where(s => !assignedStaffIds.Contains(s.Id))
+                    .ToList();
 
                 availableStaffPerBooking[booking.Id] = available;
             }
 
             ViewBag.AvailableStaffPerBooking = availableStaffPerBooking;
+
+
 
 
             //Create the view model and pass the data into the view:
@@ -155,11 +169,29 @@ namespace SwiftMove.Controllers
             return RedirectToAction("Index");
 
         }
+
+        [Authorize(Roles = "Admin, Staff")]
+        [HttpPost]
+        public IActionResult DeleteService(int id)
+        {
+            var services = _context.Services.Find(id);
+
+            if (services == null)
+            {
+                return NotFound();
+            }
+
+            _context.Services.Remove(services);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
         //Service Related ---------------------------------------------------------------------------------------------------------------
 
 
         //Role Assignment Related -------------------------------------------------------------------------------------------------------
         //AssignRole POST Method
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> AssignRole(string userID, string roleName)
         {
             //Grabs user from their Id
@@ -176,6 +208,7 @@ namespace SwiftMove.Controllers
 
         //Remove Role POST Method
         [HttpPost]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> RemoveRole(string userID, string roleName)
         {
             //Grabs user from their Id
@@ -192,6 +225,7 @@ namespace SwiftMove.Controllers
 
         //Role Creation POST Method
         [HttpPost]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> AddRole(string roleName)
         {
             //Standard Validation - Checks not blank and already exists
@@ -210,6 +244,7 @@ namespace SwiftMove.Controllers
 
         //Role Deletion POST Method
         [HttpPost]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> DeleteRole(string roleID)
         {
             //Obtain the role
@@ -224,6 +259,7 @@ namespace SwiftMove.Controllers
         //Bookings Related --------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> AssignStaff(int bookingId, string staffId)
         {
             // Check if already assigned
@@ -272,6 +308,7 @@ namespace SwiftMove.Controllers
 
         //Booking update POST action
         [HttpPost]
+        [Authorize(Roles = "Admin, Staff")]
         public IActionResult UpdateBookingStatus(int bookingId, BookingStatus status)
         {
             var booking = _context.Bookings.FirstOrDefault(b => b.Id == bookingId);
@@ -289,6 +326,7 @@ namespace SwiftMove.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin, Staff")]
         public IActionResult EditBooking(int id)
         {
             var booking = _context.Bookings
@@ -310,25 +348,74 @@ namespace SwiftMove.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin, Staff")]
         public IActionResult EditBooking(BookingsModel bookings)
         {
-            var existingBooking = _context.Bookings.Find(bookings.Id);
-            if (existingBooking == null)
-            {
-                return NotFound();
-            }
+            var existingBooking = _context.Bookings
+                .Include(b => b.StaffAssignments)
+                .FirstOrDefault(b => b.Id == bookings.Id);
 
-            // Only update fields that are meant to change
+            if (existingBooking == null)
+                return NotFound();
+
+            // Update main fields
+            existingBooking.ServiceId = bookings.ServiceId;
             existingBooking.BookingDate = bookings.BookingDate;
             existingBooking.Status = bookings.Status;
             existingBooking.Notes = bookings.Notes;
-            existingBooking.ServiceId = bookings.ServiceId;
+
+            // Get the new number of staff required
+            var service = _context.Services.FirstOrDefault(s => s.Id == bookings.ServiceId);
+            if (service != null)
+            {
+                int requiredStaff = service.NumStaffRequired;
+
+                // Trim excess staff if over-assigned
+                if (existingBooking.StaffAssignments.Count > requiredStaff)
+                {
+                    var toRemove = existingBooking.StaffAssignments
+                                    .Skip(requiredStaff)
+                                    .ToList(); // Get extras to remove
+
+                    foreach (var assignment in toRemove)
+                    {
+                        _context.StaffAssignments.Remove(assignment);
+                    }
+                }
+            }
 
             _context.Update(existingBooking);
             _context.SaveChanges();
 
             return RedirectToAction("Index");
         }
+
+        //Delete Functionality
+        [HttpPost]
+        [Authorize(Roles = "Admin, Staff")]
+        public IActionResult DeleteBooking(int id)
+        {
+            var booking = _context.Bookings
+                .Include(b => b.StaffAssignments)
+                .FirstOrDefault(b => b.Id == id);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            // Remove any related staff assignments first
+            if (booking.StaffAssignments != null && booking.StaffAssignments.Any())
+            {
+                _context.StaffAssignments.RemoveRange(booking.StaffAssignments);
+            }
+
+            _context.Bookings.Remove(booking);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
+
 
     }
 }
