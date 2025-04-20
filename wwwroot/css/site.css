@@ -33,6 +33,7 @@ html.uryjhcs.idc0_350 body div.container {
     width: 100vw !important; /* Make it span full screen */
     height: 9vw;
     margin-left: calc(-50vw + 50%) !important; /* Pull it left outside the container */
+    margin-bottom: 2%;
     background-color: #436B47 !important;
 }
 
