@@ -10,5 +10,6 @@ namespace SwiftMove.Models
         public List<IdentityRole> Roles { get; set; }
         public List<ServicesModel> Services { get; set; }
         public Dictionary<string, List<string>> UserRoles { get; set; }
+        public List<BookingsModel> Bookings { get; set; }
     }
 }

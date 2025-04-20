@@ -32,13 +32,16 @@ namespace SwiftMove.Controllers
             var users = await _userManager.Users.ToListAsync();
             var roles = await _roleManager.Roles.ToListAsync();
             var userRoles = new Dictionary<string, List<string>>();
-
             //Populating the dictionary with the user roles data.
             foreach (var user in users)
             {
                 var userRole = await _userManager.GetRolesAsync(user);
                 userRoles[user.Id] = userRole.ToList();
             }
+            var bookings = await _context.Bookings
+            .Include(b => b.Service)
+            .Include(b => b.Customer)
+            .ToListAsync();
 
             //Create the view model and pass the data into the view:
             var viewModel = new AdminDashboardViewModel
@@ -46,13 +49,16 @@ namespace SwiftMove.Controllers
                 Users = users,
                 Roles = roles,
                 Services = services,
-                UserRoles = userRoles
+                UserRoles = userRoles,
+                Bookings = bookings
             };
 
 
 
             return View(viewModel);
         }
+
+        //Service Related ---------------------------------------------------------------------------------------------------------------
         //GET Request for Services/Edit
         [Authorize(Roles = "Admin, Staff")]
         public IActionResult Edit(int id)
@@ -67,6 +73,7 @@ namespace SwiftMove.Controllers
             return View(service);
         }
 
+        //POST Request for services/Edit
         [Authorize(Roles = "Admin,Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -124,8 +131,10 @@ namespace SwiftMove.Controllers
             return RedirectToAction("Index");
 
         }
+        //Service Related ---------------------------------------------------------------------------------------------------------------
 
 
+        //Role Assignment Related -------------------------------------------------------------------------------------------------------
         //AssignRole POST Method
         public async Task<IActionResult> AssignRole(string userID, string roleName)
         {
@@ -186,6 +195,9 @@ namespace SwiftMove.Controllers
             return RedirectToAction("Index");
         }
 
+        //Role Assignment Related -------------------------------------------------------------------------------------------------------
+
+        //Bookings Related --------------------------------------------------------------------------------------------------------------
 
 
     }
