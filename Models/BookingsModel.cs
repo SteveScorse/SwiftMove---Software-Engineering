@@ -32,6 +32,7 @@ namespace SwiftMove.Models
         [Required]
         [Range(1, 20, ErrorMessage = "You must assign at least 1 staff")]
         public int AssignedStaffCount { get; set; }
+        public ICollection<StaffAssignmentModel> StaffAssignments { get; set; }
 
         // Optional: Notes for staff or customer
         [StringLength(500)]

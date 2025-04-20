@@ -6,6 +6,8 @@
 <h1>Administrator Dashboard</h1>
 <p>Manage all staff and admin function from this page, use the forms provided below to interact with database.</p>
 
+
+<!--Services Related------------------------------------------------------------------------------->
 <h2>Manage Services</h2>
 <a class="btn btn-custom w-50" asp-controller="Services" asp-action="Create">Add New Service</a>
 <h3>Current Services</h3>
@@ -57,7 +59,9 @@
         }
     }
 </script>
+<!--Services Related------------------------------------------------------------------------------->
 
+<!--Role Assignment Related------------------------------------------------------------------------------->
 <div class="row">
     <div class="col h-auto bg-white shadow-lg rounded-3">
         <h2>Manage Account Assigned Roles</h2>
@@ -121,8 +125,9 @@
         </table>
     </div>
 </div>
+<!--Role Assignment Related------------------------------------------------------------------------------->
 
-
+<!--Role Management Related------------------------------------------------------------------------------->
 <h2>Manage Roles</h2>
 <form asp-controller="Admin" asp-action="AddRole" method="post" class="mb-3 d-flex">
     <input type="text" name="roleName" class="form-control w-75 me-2" required placeholder="Enter the new role" />
@@ -157,5 +162,57 @@
         return confirm("Are you sure you want to delete this role?");
     }
 </script>
+<!--Role Management Related------------------------------------------------------------------------------->
 
-</div>
+<!--Bookings Related------------------------------------------------------------------------------->
+
+<h3>Bookings</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Assigned Staff</th>
+            <th>Assign Staff</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var booking in Model.Bookings)
+        {
+            <tr>
+                <td>@booking.Id</td>
+                <td>@booking.Customer?.FirstName @booking.Customer?.LastName</td>
+                <td>@booking.Service?.Title</td>
+                <td>@booking.BookingDate.ToShortDateString()</td>
+                <td>
+                    @foreach (var sa in booking.StaffAssignments)
+                    {
+                        <span class="badge bg-info text-dark">@sa.Staff.FirstName</span>
+                    }
+                </td>
+                <td>
+                    <form asp-action="AssignStaffInline" method="post">
+                        <input type="hidden" name="bookingId" value="@booking.Id" />
+
+                        <select name="staffIds" multiple class="form-select form-select-sm">
+                            @foreach (var staff in ViewBag.AllStaff as List<CustomUserModel>)
+                            {
+                                var assigned = booking.StaffAssignments.Any(a => a.StaffId == staff.Id);
+                                <option value="@staff.Id" selected="@assigned">
+                                    @staff.FirstName @staff.LastName
+                                </option>
+                            }
+                        </select>
+
+                        <button type="submit" class="btn btn-sm btn-success mt-1">Save</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<!--Bookings Related------------------------------------------------------------------------------->

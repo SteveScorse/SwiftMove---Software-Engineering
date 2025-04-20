@@ -38,10 +38,17 @@ namespace SwiftMove.Controllers
                 var userRole = await _userManager.GetRolesAsync(user);
                 userRoles[user.Id] = userRole.ToList();
             }
+
             var bookings = await _context.Bookings
             .Include(b => b.Service)
             .Include(b => b.Customer)
+            .Include(b => b.StaffAssignments)
+            .ThenInclude(sa => sa.Staff)
             .ToListAsync();
+
+            var staff = await _userManager.GetUsersInRoleAsync("Staff");
+            ViewBag.AllStaff = staff;
+
 
             //Create the view model and pass the data into the view:
             var viewModel = new AdminDashboardViewModel
@@ -198,6 +205,33 @@ namespace SwiftMove.Controllers
         //Role Assignment Related -------------------------------------------------------------------------------------------------------
 
         //Bookings Related --------------------------------------------------------------------------------------------------------------
+
+        [HttpPost]
+        public async Task<IActionResult> AssignStaffInline(int bookingId, List<string> staffIds)
+        {
+            var booking = await _context.Bookings
+                .Include(b => b.StaffAssignments)
+                .FirstOrDefaultAsync(b => b.Id == bookingId);
+
+            if (booking == null)
+                return NotFound();
+
+            // Remove existing assignments
+            _context.StaffAssignments.RemoveRange(booking.StaffAssignments);
+
+            // Add new
+            foreach (var staffId in staffIds)
+            {
+                _context.StaffAssignments.Add(new StaffAssignmentModel
+                {
+                    BookingId = bookingId,
+                    StaffId = staffId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
 
 
     }

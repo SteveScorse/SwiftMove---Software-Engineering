@@ -15,5 +15,6 @@ namespace SwiftMove.Data
         // Each of these represents a table in the DB
         public DbSet<ServicesModel> Services { get; set; }
         public DbSet<BookingsModel> Bookings { get; set; }
+        public DbSet<StaffAssignmentModel> StaffAssignments { get; set; }
     }
 }
