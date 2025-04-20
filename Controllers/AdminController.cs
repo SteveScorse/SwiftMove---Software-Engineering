@@ -157,7 +157,34 @@ namespace SwiftMove.Controllers
             return RedirectToAction("Index");
         }
 
-        
+        //Role Creation POST Method
+        [HttpPost]
+        public async Task<IActionResult> AddRole(string roleName)
+        {
+            //Standard Validation - Checks not blank and already exists
+            if (!string.IsNullOrEmpty(roleName) && !await _roleManager.RoleExistsAsync(roleName))
+            {
+                //Create Role
+                await _roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+            else
+            {
+                return BadRequest("Role already exists or is empty");
+            }
+            //Page Refresh to Display new role.
+            return RedirectToAction("Index");
+        }
+
+        //Role Deletion POST Method
+        [HttpPost]
+        public async Task<IActionResult> DeleteRole(string roleID)
+        {
+            //Obtain the role
+            var role = await _roleManager.FindByIdAsync(roleID);
+            //Delete the role
+            await _roleManager.DeleteAsync(role);
+            return RedirectToAction("Index");
+        }
 
 
 
