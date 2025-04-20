@@ -57,3 +57,68 @@
         }
     }
 </script>
+
+<div class="row">
+    <div class="col h-auto bg-white shadow-lg rounded-3">
+        <h2>Manage Account Assigned Roles</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                    <th>Current Roles</th>
+                    <th>Add Roles</th>
+                    <th>Remove Roles</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    List<string> currentuserRoles = Model.UserRoles[user.Id];
+                    <tr>
+                        <td>@user.FirstName</td>
+                        <td>@user.LastName</td>
+                        <td>@user.Email</td>
+                        <td>@user.Address</td>
+                        <td>
+                            @foreach (var role in currentuserRoles)
+                            {
+                                @role
+                        
+                                <br />
+                            }
+                        </td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="AssignRole" method="post" class="d-flex">
+                                <input type="hidden" name="userID" value="@user.Id" />
+                                <select name="roleName" class="form-select me-2">
+                                    @foreach (var role in Model.Roles)
+                                    {
+                                        <option value="@role.Name">@role.Name</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-success">Assign</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="RemoveRole" method="post" class="d-flex">
+                                <input type="hidden" name="userID" value="@user.Id" />
+                                <select name="roleName" class="form-select">
+                                    @foreach (var role in currentuserRoles)
+                                    {
+                                        <option value="@role">@role</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-danger">Remove</button>
+                            </form>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>

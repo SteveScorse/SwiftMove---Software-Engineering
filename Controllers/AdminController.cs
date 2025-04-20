@@ -53,7 +53,7 @@ namespace SwiftMove.Controllers
 
             return View(viewModel);
         }
-
+        //GET Request for Services/Edit
         [Authorize(Roles = "Admin, Staff")]
         public IActionResult Edit(int id)
         {
@@ -115,6 +115,8 @@ namespace SwiftMove.Controllers
                 }
             }
 
+
+
             //updates DB
             _context.Update(existingService);
             _context.SaveChanges();
@@ -124,6 +126,38 @@ namespace SwiftMove.Controllers
         }
 
 
+        //AssignRole POST Method
+        public async Task<IActionResult> AssignRole(string userID, string roleName)
+        {
+            //Grabs user from their Id
+            var user = await _userManager.FindByIdAsync(userID);
+            if (user == null)
+            {
+                return BadRequest("Invalid User!");
+            }
+            //Add the Role
+            await _userManager.AddToRoleAsync(user, roleName);
+
+            return RedirectToAction("Index");
+        }
+
+        //Remove Role POST Method
+        [HttpPost]
+        public async Task<IActionResult> RemoveRole(string userID, string roleName)
+        {
+            //Grabs user from their Id
+            var user = await _userManager.FindByIdAsync(userID);
+            if (user == null)
+            {
+                return BadRequest("Invalid User!");
+            }
+            //remove the Role
+            await _userManager.RemoveFromRoleAsync(user, roleName);
+
+            return RedirectToAction("Index");
+        }
+
+        
 
 
 
