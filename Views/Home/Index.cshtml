@@ -2,7 +2,47 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="container text-white hero-content">
+        <h1 class="display-4 heavy ">MOVING<br>HASN’T BEEN<br>EASIER</h1>
+            <div class="mt-4">
+            <a asp-controller="Bookings" asp-action="Index" class="btn btn-success rounded-pill mx-1 px-4 fw-bold">BOOK HERE</a>
+            <a asp-controller="Services" asp-action="Index" class="btn btn-outline-success text-white rounded rounded-pill mx-2 px-4 fw-bold">MORE</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Why SwiftMove Section -->
+    <div class="why-section">
+        <div class="container">
+            <h1 class="mb-4">WHY <br> SWIFTMOVE?</h1>
+            <div class="row g-4 ">
+                <div class="col-md-4 ">
+                <div class="card1 border-0 shadow-sm h-100">
+                    <div class="card-body1 p-4">
+                            <h5 class="card-title fw-bold">Fast & Reliable Service</h5>
+                        <p class="card-text">SwiftMove lives up to its name. We pride ourselves on fast, efficient service that doesn’t sacrifice quality. Whether it’s a local move or a long haul, expect a quick, smooth, and stress-free time.<br>  </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card1 border-0 shadow-sm h-100">
+                    <div class="card-body1 p-4">
+                            <h5 class="card-title fw-bold">Affordable, Transparent Pricing</h5>
+                        <p class="card-text">No hidden fees. No surprises. SwiftMove provides clear breakdowns of your moving costs and budget-friendly packages. You’ll know what you’re paying for—every box, every mile—and how to save money and time.<br>   </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card1 border-0 shadow-sm h-100">
+                    <div class="card-body1 p-4">
+                            <h5 class="card-title fw-bold">Experienced & Friendly Team</h5>
+                            <p class="card-text">Our crew is your crew. With years of experience, our dedicated movers are trained to handle all your items with care. From heavy furniture to fragile valuables, they’ve got the right attitude, tools, and communication skills.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

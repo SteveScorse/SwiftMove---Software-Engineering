@@ -27,8 +27,12 @@
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SwiftMove</a>
+            <div class="container-fluid container">
+
+                <a asp-controller="Home" asp-action="Index">
+                    <img asp-controller="Home" asp-action="Index" class="img-fluid w-75" alt="logo" id="logo" src="/Images/logo.png" />
+                </a>
+                <a class="navbar-brand fw-mid" asp-area="" asp-controller="Home" asp-action="Index">SwiftMove</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -57,17 +61,19 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="">
+        <main role="main" class="">
             @RenderBody()
         </main>
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - SwiftMove - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <div class="container d-flex justify-content-between">
+            <p class="mb-0">&copy; 2025 SwiftMove PLC</p>
+            <p class="mb-0">Designed by Steve Scorse</p>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
