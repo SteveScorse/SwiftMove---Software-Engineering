@@ -8,7 +8,7 @@ namespace SwiftMove.ViewModels
 {
     public class BookingFormViewModel
     {
-        // Booking Data
+        //Booking Data
         [Required(ErrorMessage = "Please select a service.")]
         public int ServiceId { get; set; }
 
@@ -19,7 +19,7 @@ namespace SwiftMove.ViewModels
         [StringLength(500)]
         public string Notes { get; set; }
 
-        // Populated in controller
+        //Populated in controller
         public List<SelectListItem> AvailableServices { get; set; } = new List<SelectListItem>();
     }
 }

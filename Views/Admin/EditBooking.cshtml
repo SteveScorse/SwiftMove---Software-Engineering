@@ -33,6 +33,7 @@
     <div class="mb-3">
         <label asp-for="Status" class="form-label">Status</label>
         <select asp-for="Status" class="form-select">
+            <!-- Loop to Select Status from Enum in BookingModel -->
             @foreach (var status in Enum.GetValues(typeof(SwiftMove.Models.BookingStatus)))
             {
                 <option value="@status" selected="@(Model.Status == (SwiftMove.Models.BookingStatus)status)">

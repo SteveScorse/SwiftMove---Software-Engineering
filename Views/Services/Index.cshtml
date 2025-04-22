@@ -2,17 +2,19 @@
 @{
     ViewData["Title"] = "Services";
 }
+<!-- Header Div-->
 <div class="container">
 <div class="container1 justify-content-center" style="max-width: 2000px">
     <div class="container text-start pt-5 pb-4">
         <h1 class="container text-white h1a ">Services</h1>
     </div>
 </div>
+<!-- Header Div-->
 <div class="container mb-4">
     <h5 >Below is the list of all our services we currently have to offer</h5>
 </div>
 
-
+<!-- Service Cards Generated based of Services Data -->
 <div class="container ">
     <div class="row g-4">
     @foreach (var services in Model)
